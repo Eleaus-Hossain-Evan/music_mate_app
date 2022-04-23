@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:music_mates_app/data/data_export.dart';
 import 'package:music_mates_app/data/model/home_model.dart';
+import 'package:music_mates_app/presentation/query_document_provider.dart';
 import 'package:music_mates_app/presentation/widgets/export.dart';
+
+import 'widgets/query_wrapper.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -14,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     const backgroundColor = Colors.white;
-    final homeModel = HomeModel();
+    final HomeModel homeModel = HomeModel();
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -23,7 +26,16 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: backgroundColor,
         title: const Text("Music Mates"),
       ),
-      body: _Content(homeModel: homeModel),
+      body: QueryWrapper<HomeModel>(
+        queryString: context.queries.fetchUserInfo(),
+        dataParser: (json) => HomeModel.fromJson(json),
+        variables: {
+          'googleId': context.retrieveGoogleId,
+        },
+        contentBuilder: (data) {
+          return _Content(homeModel: data);
+        },
+      ),
     );
   }
 }
@@ -47,8 +59,8 @@ class _Content extends StatelessWidget {
           height: height * 0.6,
           width: size.width,
           child: MatesRingWidget(
-            currentUser: homeModel.currentUser,
-            musicMates: homeModel.musicMates,
+            currentUser: homeModel.currentUser!,
+            musicMates: homeModel.musicMates!,
           ),
         ),
         Align(
@@ -60,7 +72,7 @@ class _Content extends StatelessWidget {
               height: height * 0.3,
               width: size.width,
               child: _MyFavouriteListView(
-                favouriteArtist: homeModel.currentUser.favouriteArtist ?? [],
+                favouriteArtist: homeModel.currentUser!.favouriteArtist ?? [],
               ),
             ),
           ),
